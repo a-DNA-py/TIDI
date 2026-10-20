@@ -1,0 +1,365 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1560" height="1360" viewBox="0 0 1560 1360" font-family="Helvetica, Arial, sans-serif">
+  <title>TIDI car wiring — ESP32</title>
+  <defs>
+    <!-- ground: wire ends at (0,0) -->
+    <g id="gnd" stroke="#111" stroke-width="2" fill="none">
+      <line x1="0" y1="0" x2="0" y2="8"/>
+      <line x1="-12" y1="8" x2="12" y2="8"/>
+      <line x1="-7" y1="14" x2="7" y2="14"/>
+      <line x1="-2" y1="20" x2="2" y2="20"/>
+    </g>
+    <!-- power flag: wire ends at (0,0), bar above -->
+    <g id="pwr" fill="none" stroke-width="2">
+      <line x1="0" y1="0" x2="0" y2="-18"/>
+      <line x1="-10" y1="-18" x2="10" y2="-18"/>
+    </g>
+  </defs>
+  <style>
+    .box  { fill: #fbfaf6; stroke: #111; stroke-width: 2; }
+    .pin  { stroke: #111; stroke-width: 2; }
+    .ref  { font-size: 14px; font-weight: bold; fill: #111; }
+    .sub  { font-size: 11px; fill: #555; }
+    .pn   { font-size: 11px; fill: #333; }
+    .lbl  { font-size: 12px; fill: #111; }
+    .bat  { stroke: #c62828; stroke-width: 2.5; fill: none; }
+    .v5   { stroke: #a67c00; stroke-width: 2.5; fill: none; }
+    .sig  { stroke: #1565c0; stroke-width: 2; fill: none; }
+    .mot  { stroke: #6a1b9a; stroke-width: 2.5; fill: none; }
+    .gw   { stroke: #111; stroke-width: 2; fill: none; }
+    .v33  { stroke: #ef6c00; stroke-width: 2.5; fill: none; }
+    .dot  { stroke: none; }
+  </style>
+  <rect width="1560" height="1360" fill="#ffffff"/>
+
+  <text x="40" y="48" font-size="22" font-weight="bold" fill="#111">TIDI — car electronics, ESP32</text>
+  <text x="40" y="70" class="sub" font-size="13">Drawn as a plan 2026-09-28; the Pi link added 2026-10-19 as Dhairya wired it; the GPS (U8) wired 2026-10-19, not yet read; U4 is now an MG90S. Elsewhere, whether the car matches is unmeasured.</text>
+
+  <!-- ================= BATTERY ================= -->
+  <line class="bat" x1="120" y1="120" x2="120" y2="175"/>
+  <g stroke="#111" stroke-width="2.5">
+    <line x1="100" y1="175" x2="140" y2="175"/>
+    <line x1="109" y1="185" x2="131" y2="185"/>
+    <line x1="100" y1="195" x2="140" y2="195"/>
+    <line x1="109" y1="205" x2="131" y2="205"/>
+  </g>
+  <text x="146" y="172" class="lbl" font-weight="bold">+</text>
+  <line class="gw" x1="120" y1="205" x2="120" y2="250"/>
+  <use xlink:href="#gnd" x="120" y="250"/>
+  <text x="92" y="176" class="ref" text-anchor="end">BT1</text>
+  <text x="92" y="192" class="sub" text-anchor="end">3S LiPo</text>
+  <text x="92" y="206" class="sub" text-anchor="end">11.1 V</text>
+  <text x="92" y="220" class="sub" text-anchor="end">12.6 V full</text>
+
+  <!-- unswitched BAT+ -->
+  <line class="bat" x1="120" y1="120" x2="152" y2="120"/>
+
+  <!-- switch -->
+  <circle cx="155" cy="120" r="3.5" fill="#fff" stroke="#111" stroke-width="2"/>
+  <circle cx="190" cy="120" r="3.5" fill="#fff" stroke="#111" stroke-width="2"/>
+  <line x1="157" y1="118" x2="188" y2="100" stroke="#111" stroke-width="2.5"/>
+  <text x="172" y="92" class="ref" font-size="12" text-anchor="middle">SW1</text>
+
+  <!-- switched rail -->
+  <line class="bat" x1="193" y1="120" x2="1110" y2="120"/>
+  <line class="bat" x1="1110" y1="120" x2="1110" y2="310"/>
+  <circle class="dot" cx="220" cy="120" r="4" fill="#c62828"/>
+  <circle class="dot" cx="380" cy="120" r="4" fill="#c62828"/>
+  <text x="700" y="112" class="sub" fill="#c62828">BAT_SW  (9.9–12.6 V)</text>
+
+  <!-- divider: R1 on top, R2 ∥ R3 below -->
+  <line class="bat" x1="220" y1="120" x2="220" y2="150"/>
+  <rect x="212" y="150" width="16" height="50" fill="#fff" stroke="#111" stroke-width="2"/>
+  <line class="sig" x1="220" y1="200" x2="220" y2="260"/>
+  <circle class="dot" cx="220" cy="235" r="4" fill="#1565c0"/>
+  <circle class="dot" cx="220" cy="250" r="4" fill="#1565c0"/>
+  <polyline class="sig" points="220,250 180,250 180,260"/>
+  <rect x="212" y="260" width="16" height="50" fill="#fff" stroke="#111" stroke-width="2"/>
+  <rect x="172" y="260" width="16" height="50" fill="#fff" stroke="#111" stroke-width="2"/>
+  <polyline class="gw" points="180,310 180,320 220,320"/>
+  <line class="gw" x1="220" y1="310" x2="220" y2="330"/>
+  <circle class="dot" cx="220" cy="320" r="4" fill="#111"/>
+  <use xlink:href="#gnd" x="220" y="330"/>
+  <text x="236" y="172" class="ref" font-size="12">R1</text>
+  <text x="236" y="188" class="sub">10 kΩ</text>
+  <text x="236" y="282" class="ref" font-size="12">R2, R3</text>
+  <text x="236" y="298" class="sub">4.7 kΩ each, in parallel</text>
+  <text x="236" y="312" class="sub">(2.35 kΩ)</text>
+  <line class="sig" x1="220" y1="235" x2="250" y2="235"/>
+  <polygon points="250,235 258,226 338,226 338,244 258,244" fill="#e3edf9" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="298" y="239" class="pn" text-anchor="middle" fill="#1565c0">VBAT_SENSE</text>
+
+  <!-- ================= BUCK U2 ================= -->
+  <line class="bat" x1="380" y1="120" x2="380" y2="250"/>
+  <line class="bat" x1="380" y1="250" x2="420" y2="250"/>
+  <rect class="box" x="420" y="170" width="160" height="110"/>
+  <text x="500" y="196" class="ref" text-anchor="middle">U2  XH-M404</text>
+  <text x="500" y="212" class="sub" text-anchor="middle">XL4016E1 buck</text>
+  <text x="500" y="228" class="sub" text-anchor="middle">set to 5 V</text>
+  <text x="427" y="254" class="pn">IN+</text>
+  <text x="573" y="254" class="pn" text-anchor="end">OUT+</text>
+  <text x="450" y="273" class="pn" text-anchor="middle">IN−</text>
+  <text x="550" y="273" class="pn" text-anchor="middle">OUT−</text>
+  <line class="gw" x1="450" y1="280" x2="450" y2="300"/>
+  <use xlink:href="#gnd" x="450" y="300"/>
+  <line class="gw" x1="550" y1="280" x2="550" y2="300"/>
+  <use xlink:href="#gnd" x="550" y="300"/>
+
+  <!-- +5V -->
+  <polyline class="v5" points="580,250 610,250 610,330 640,330"/>
+  <circle class="dot" cx="610" cy="250" r="4" fill="#a67c00"/>
+  <use xlink:href="#pwr" x="610" y="250" stroke="#a67c00"/>
+  <text x="610" y="224" class="lbl" font-weight="bold" fill="#a67c00" text-anchor="middle">+5V</text>
+
+  <!-- ================= ESP32 U1 ================= -->
+  <rect class="box" x="680" y="300" width="220" height="580"/>
+  <text x="790" y="640" class="ref" font-size="16" text-anchor="middle">U1</text>
+  <text x="790" y="660" class="lbl" text-anchor="middle">ESP32 dev board</text>
+  <text x="790" y="676" class="sub" text-anchor="middle">ESP32-WROOM-32 DevKit</text>
+  <text x="790" y="690" class="sub" text-anchor="middle">(assumed)</text>
+  <g class="pin">
+    <line x1="640" y1="330" x2="680" y2="330"/>
+    <line x1="640" y1="460" x2="680" y2="460"/>
+    <line x1="640" y1="565" x2="680" y2="565"/>
+    <line x1="640" y1="705" x2="680" y2="705"/>
+    <line x1="640" y1="835" x2="680" y2="835"/>
+    <line x1="900" y1="420" x2="940" y2="420"/>
+    <line x1="900" y1="460" x2="940" y2="460"/>
+    <line x1="900" y1="540" x2="940" y2="540"/>
+    <line x1="900" y1="580" x2="940" y2="580"/>
+    <line x1="790" y1="880" x2="790" y2="900"/>
+  </g>
+  <text x="688" y="334" class="pn">5V (VIN)</text>
+  <text x="688" y="464" class="pn">GPIO34 (ADC1)</text>
+  <text x="688" y="569" class="pn">GPIO27 (RX2)</text>
+  <text x="688" y="709" class="pn">GPIO18</text>
+  <text x="688" y="839" class="pn">GPIO19</text>
+  <text x="892" y="424" class="pn" text-anchor="end">GPIO25</text>
+  <text x="892" y="464" class="pn" text-anchor="end">GPIO26</text>
+  <text x="892" y="544" class="pn" text-anchor="end">GPIO33</text>
+  <text x="892" y="584" class="pn" text-anchor="end">GPIO32</text>
+  <text x="790" y="874" class="pn" text-anchor="middle">GND</text>
+  <use xlink:href="#gnd" x="790" y="900"/>
+  <g class="pin">
+    <line x1="742" y1="880" x2="742" y2="900"/>
+    <line x1="764" y1="880" x2="764" y2="900"/>
+  </g>
+  <text x="746" y="874" class="pn" transform="rotate(-90 746 874)">GPIO16 (RX1)</text>
+  <text x="768" y="874" class="pn" transform="rotate(-90 768 874)">GPIO17 (TX1)</text>
+
+  <!-- ================= Raspberry Pi 5 U7 ================= -->
+  <rect class="box" x="300" y="950" width="280" height="180"/>
+  <text x="440" y="972" class="ref" text-anchor="middle">U7  Raspberry Pi 5</text>
+  <text x="440" y="988" class="sub" text-anchor="middle">brain · GOFI Node/tidi.py · logic 3.3 V</text>
+  <text x="440" y="1004" class="sub" text-anchor="middle">UART0 → ESP32 at 115200 · UART2 ← GPS</text>
+  <text x="440" y="1020" class="sub" text-anchor="middle">own UPS HAT (E), no car rail</text>
+  <g class="pin">
+    <line x1="580" y1="1050" x2="620" y2="1050"/>
+    <line x1="580" y1="1080" x2="620" y2="1080"/>
+    <line x1="580" y1="1110" x2="620" y2="1110"/>
+  </g>
+  <text x="573" y="1054" class="pn" text-anchor="end">GPIO14 TXD0 (pin 8)</text>
+  <text x="573" y="1084" class="pn" text-anchor="end">GPIO15 RXD0 (pin 10)</text>
+  <text x="573" y="1114" class="pn" text-anchor="end">GND</text>
+  <polyline class="sig" points="742,900 742,1050 620,1050"/>
+  <polyline class="sig" points="764,900 764,1080 620,1080"/>
+  <polyline class="gw" points="620,1110 650,1110 650,1120"/>
+  <use xlink:href="#gnd" x="650" y="1120"/>
+
+  <!-- ================= GPS U8, on the Pi's UART2 ================= -->
+  <g class="pin">
+    <line x1="260" y1="1035" x2="300" y2="1035"/>
+    <line x1="260" y1="1060" x2="300" y2="1060"/>
+    <line x1="260" y1="1085" x2="300" y2="1085"/>
+    <line x1="260" y1="1110" x2="300" y2="1110"/>
+  </g>
+  <text x="307" y="1039" class="pn">3V3 (pin 1)</text>
+  <text x="307" y="1064" class="pn">GPIO5 RXD2 (pin 29)</text>
+  <text x="307" y="1089" class="pn">GPIO4 TXD2 (pin 7)</text>
+  <text x="307" y="1114" class="pn">GND (pin 9)</text>
+  <rect class="box" x="40" y="990" width="160" height="140"/>
+  <text x="120" y="1012" class="ref" text-anchor="middle">U8  NEO-6M</text>
+  <text x="120" y="1026" class="sub" text-anchor="middle">GPS · UART 9600</text>
+  <g class="pin">
+    <line x1="200" y1="1035" x2="220" y2="1035"/>
+    <line x1="200" y1="1060" x2="220" y2="1060"/>
+    <line x1="200" y1="1085" x2="220" y2="1085"/>
+    <line x1="200" y1="1110" x2="220" y2="1110"/>
+  </g>
+  <text x="193" y="1039" class="pn" text-anchor="end">VCC</text>
+  <text x="193" y="1064" class="pn" text-anchor="end">TX</text>
+  <text x="193" y="1089" class="pn" text-anchor="end">RX</text>
+  <text x="193" y="1114" class="pn" text-anchor="end">GND</text>
+  <line class="v33" x1="220" y1="1035" x2="260" y2="1035"/>
+  <line class="sig" x1="220" y1="1060" x2="260" y2="1060"/>
+  <line class="sig" x1="220" y1="1085" x2="260" y2="1085"/>
+  <line class="gw"  x1="220" y1="1110" x2="260" y2="1110"/>
+
+  <!-- GPIO34 -->
+  <line class="sig" x1="640" y1="460" x2="620" y2="460"/>
+  <polygon points="620,460 612,451 532,451 532,469 612,469" fill="#e3edf9" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="572" y="464" class="pn" text-anchor="middle" fill="#1565c0">VBAT_SENSE</text>
+
+  <!-- ================= TF-Luna U3 ================= -->
+  <rect class="box" x="300" y="500" width="170" height="100"/>
+  <text x="385" y="522" class="ref" text-anchor="middle">U3  TF-Luna</text>
+  <text x="385" y="538" class="sub" text-anchor="middle">LiDAR · UART 115200</text>
+  <text x="307" y="569" class="pn">5V</text>
+  <text x="307" y="589" class="pn">GND</text>
+  <text x="463" y="569" class="pn" text-anchor="end">TX</text>
+  <text x="463" y="589" class="pn" text-anchor="end">RX</text>
+  <line class="sig" x1="470" y1="565" x2="640" y2="565"/>
+  <line class="pin" x1="470" y1="585" x2="490" y2="585"/>
+  <g stroke="#111" stroke-width="2"><line x1="484" y1="579" x2="496" y2="591"/><line x1="496" y1="579" x2="484" y2="591"/></g>
+  <text x="502" y="589" class="sub">NC</text>
+  <polyline class="v5" points="300,565 270,565 270,545"/>
+  <use xlink:href="#pwr" x="270" y="545" stroke="#a67c00"/>
+  <text x="270" y="519" class="lbl" font-weight="bold" fill="#a67c00" text-anchor="middle">+5V</text>
+  <polyline class="gw" points="300,585 250,585 250,600"/>
+  <use xlink:href="#gnd" x="250" y="600"/>
+
+  <!-- ================= MG90S U4, azimuth ================= -->
+  <rect class="box" x="300" y="640" width="170" height="90"/>
+  <text x="385" y="662" class="ref" text-anchor="middle">U4  MG90S</text>
+  <text x="385" y="678" class="sub" text-anchor="middle">180° · azimuth</text>
+  <text x="307" y="704" class="pn">V+</text>
+  <text x="307" y="724" class="pn">GND</text>
+  <text x="463" y="709" class="pn" text-anchor="end">SIG</text>
+  <line class="sig" x1="470" y1="705" x2="640" y2="705"/>
+  <polyline class="v5" points="300,700 270,700 270,680"/>
+  <use xlink:href="#pwr" x="270" y="680" stroke="#a67c00"/>
+  <text x="270" y="654" class="lbl" font-weight="bold" fill="#a67c00" text-anchor="middle">+5V</text>
+  <polyline class="gw" points="300,720 250,720 250,735"/>
+  <use xlink:href="#gnd" x="250" y="735"/>
+
+  <!-- ================= MG90S U5, tilt ================= -->
+  <rect class="box" x="300" y="770" width="170" height="90"/>
+  <text x="385" y="792" class="ref" text-anchor="middle">U5  MG90S</text>
+  <text x="385" y="808" class="sub" text-anchor="middle">tilt · 90 = level</text>
+  <text x="307" y="834" class="pn">V+</text>
+  <text x="307" y="854" class="pn">GND</text>
+  <text x="463" y="839" class="pn" text-anchor="end">SIG</text>
+  <line class="sig" x1="470" y1="835" x2="640" y2="835"/>
+  <polyline class="v5" points="300,830 270,830 270,810"/>
+  <use xlink:href="#pwr" x="270" y="810" stroke="#a67c00"/>
+  <text x="270" y="784" class="lbl" font-weight="bold" fill="#a67c00" text-anchor="middle">+5V</text>
+  <polyline class="gw" points="300,850 250,850 250,865"/>
+  <use xlink:href="#gnd" x="250" y="865"/>
+
+  <!-- ================= MDD3A U6 ================= -->
+  <rect class="box" x="1060" y="340" width="200" height="300"/>
+  <text x="1160" y="480" class="ref" text-anchor="middle">U6  Cytron MDD3A</text>
+  <text x="1160" y="496" class="sub" text-anchor="middle">dual motor driver</text>
+  <text x="1160" y="510" class="sub" text-anchor="middle">4–16 V · 3 A cont.</text>
+  <g class="pin">
+    <line x1="1020" y1="420" x2="1060" y2="420"/>
+    <line x1="1020" y1="460" x2="1060" y2="460"/>
+    <line x1="1020" y1="540" x2="1060" y2="540"/>
+    <line x1="1020" y1="580" x2="1060" y2="580"/>
+    <line x1="1260" y1="400" x2="1300" y2="400"/>
+    <line x1="1260" y1="460" x2="1300" y2="460"/>
+    <line x1="1260" y1="540" x2="1300" y2="540"/>
+    <line x1="1260" y1="600" x2="1300" y2="600"/>
+    <line x1="1110" y1="310" x2="1110" y2="340"/>
+    <line x1="1210" y1="310" x2="1210" y2="340"/>
+    <line x1="1110" y1="640" x2="1110" y2="660"/>
+    <line x1="1210" y1="640" x2="1210" y2="660"/>
+  </g>
+  <text x="1067" y="424" class="pn">M2A</text>
+  <text x="1067" y="464" class="pn">M2B</text>
+  <text x="1067" y="544" class="pn">M1B</text>
+  <text x="1067" y="584" class="pn">M1A</text>
+  <text x="1253" y="404" class="pn" text-anchor="end">M2 A</text>
+  <text x="1253" y="464" class="pn" text-anchor="end">M2 B</text>
+  <text x="1253" y="544" class="pn" text-anchor="end">M1 A</text>
+  <text x="1253" y="604" class="pn" text-anchor="end">M1 B</text>
+  <text x="1110" y="358" class="pn" text-anchor="middle">VB+</text>
+  <text x="1210" y="358" class="pn" text-anchor="middle">5V</text>
+  <text x="1110" y="632" class="pn" text-anchor="middle">VB−</text>
+  <text x="1210" y="632" class="pn" text-anchor="middle">GND</text>
+  <text x="1160" y="378" class="sub" text-anchor="middle" font-style="italic">5V is a regulator output, unused</text>
+  <use xlink:href="#gnd" x="1110" y="660"/>
+  <use xlink:href="#gnd" x="1210" y="660"/>
+  <g stroke="#111" stroke-width="2"><line x1="1204" y1="304" x2="1216" y2="316"/><line x1="1216" y1="304" x2="1204" y2="316"/></g>
+  <text x="1224" y="314" class="sub">NC</text>
+
+  <!-- ESP32 -> MDD3A inputs -->
+  <line class="sig" x1="940" y1="420" x2="1020" y2="420"/>
+  <line class="sig" x1="940" y1="460" x2="1020" y2="460"/>
+  <line class="sig" x1="940" y1="540" x2="1020" y2="540"/>
+  <line class="sig" x1="940" y1="580" x2="1020" y2="580"/>
+
+  <!-- motors -->
+  <polyline class="mot" points="1300,400 1360,400"/>
+  <polyline class="mot" points="1300,460 1360,460"/>
+  <circle cx="1360" cy="430" r="30" fill="#fff" stroke="#111" stroke-width="2.5"/>
+  <text x="1360" y="437" font-size="20" font-weight="bold" text-anchor="middle" fill="#111">M</text>
+  <text x="1372" y="396" class="lbl" font-weight="bold">+</text>
+  <text x="1372" y="476" class="lbl" font-weight="bold">−</text>
+  <text x="1402" y="424" class="ref">M2  drive</text>
+  <text x="1402" y="440" class="sub">9 V · ~3 A</text>
+
+  <polyline class="mot" points="1300,540 1360,540"/>
+  <polyline class="mot" points="1300,600 1360,600"/>
+  <circle cx="1360" cy="570" r="30" fill="#fff" stroke="#111" stroke-width="2.5"/>
+  <text x="1360" y="577" font-size="20" font-weight="bold" text-anchor="middle" fill="#111">M</text>
+  <text x="1372" y="536" class="lbl" font-weight="bold">+</text>
+  <text x="1372" y="616" class="lbl" font-weight="bold">−</text>
+  <text x="1402" y="564" class="ref">M1  steering</text>
+  <text x="1402" y="580" class="sub">9 V · 4–5 A stall</text>
+
+  <!-- ================= LED D1 ================= -->
+  <line class="pin" x1="900" y1="850" x2="940" y2="850"/>
+  <text x="892" y="854" class="pn" text-anchor="end">GPIO23</text>
+  <line class="sig" x1="940" y1="850" x2="1000" y2="850"/>
+  <polyline class="sig" points="1000,850 1100,850 1100,862"/>
+  <polygon points="1088,862 1112,862 1100,882" fill="#fff" stroke="#111" stroke-width="2"/>
+  <line x1="1088" y1="882" x2="1112" y2="882" stroke="#111" stroke-width="2"/>
+  <g stroke="#111" stroke-width="1.5" fill="none">
+    <line x1="1114" y1="868" x2="1126" y2="858"/><polyline points="1120,858 1126,858 1126,864"/>
+    <line x1="1116" y1="878" x2="1128" y2="868"/><polyline points="1122,868 1128,868 1128,874"/>
+  </g>
+  <line class="gw" x1="1100" y1="882" x2="1100" y2="895"/>
+  <use xlink:href="#gnd" x="1100" y="895"/>
+  <text x="1136" y="878" class="ref" font-size="12">D1  LED</text>
+
+  <!-- ================= BUZZER BZ1 ================= -->
+  <line class="pin" x1="900" y1="780" x2="940" y2="780"/>
+  <text x="892" y="784" class="pn" text-anchor="end">GPIO22</text>
+  <polyline class="sig" points="940,780 1310,780 1310,790"/>
+  <rect x="1292" y="790" width="36" height="34" rx="4" fill="#fff" stroke="#111" stroke-width="2"/>
+  <path d="M1300,814 a10,10 0 0 1 20,0" fill="none" stroke="#111" stroke-width="2"/>
+  <line class="gw" x1="1310" y1="824" x2="1310" y2="840"/>
+  <use xlink:href="#gnd" x="1310" y="840"/>
+  <text x="1340" y="804" class="ref" font-size="12">BZ1</text>
+  <text x="1340" y="818" class="sub">passive buzzer, two wires</text>
+
+  <!-- ================= NOTES ================= -->
+  <rect x="960" y="930" width="570" height="390" fill="#fff" stroke="#999" stroke-width="1"/>
+  <text x="976" y="954" class="ref" font-size="13">Notes</text>
+  <text x="976" y="976" class="lbl">• Every ⏚ is one net: LiPo −, buck IN−/OUT−, ESP32, MDD3A, servos, TF-Luna, Pi.</text>
+  <text x="976" y="996" class="lbl">• Flags with the same name are the same net (+5V, VBAT_SENSE).</text>
+  <text x="976" y="1016" class="lbl">• One 5 V rail from the buck. Set it to 5 V and measure before the ESP32 goes on.</text>
+  <text x="976" y="1036" class="lbl">• V_34 = V_BAT × 2.35 / 12.35 → 12.6 V reads 2.40 V (V_BAT = V_34 × 5.26).</text>
+  <text x="988" y="1056" class="lbl">GPIO34 is ADC1, so it still reads with WiFi on. Divider is after SW1.</text>
+  <text x="976" y="1076" class="lbl">• All ESP32 inputs here are 3.3 V only. Nothing at 5 V may reach a GPIO.</text>
+  <text x="976" y="1096" class="lbl">• GPIO32 → M1A, GPIO33 → M1B: the order the firmware should assume.</text>
+  <text x="976" y="1116" class="lbl">• GPIO4 is UART2 TX in firmware: leave it unconnected. No strap pins used.</text>
+  <text x="976" y="1136" class="lbl">• If the board has no diode between USB and 5V, turn SW1 off before USB goes in.</text>
+  <text x="976" y="1156" class="lbl">• No fuse in the LiPo lead yet.</text>
+  <text x="976" y="1176" class="lbl">• D1 has no resistor: only GPIO23's driver limits its current. Firmware sets</text>
+  <text x="988" y="1196" class="lbl">the pin to its weakest drive. A series resistor is still the safe fix.</text>
+  <text x="976" y="1216" class="lbl">• BZ1 is driven straight from GPIO22, as it was on the Arduino. At 3.3 V</text>
+  <text x="988" y="1236" class="lbl">instead of 5 V it will be quieter.</text>
+  <text x="976" y="1256" class="lbl">• U8 is on the Pi's UART2 (dtoverlay=uart2-pi5). Its VCC is the Pi's 3.3 V,</text>
+  <text x="988" y="1276" class="lbl">safe whether or not the GPS board carries its own regulator.</text>
+  <g font-size="11">
+    <line class="bat" x1="976" y1="1300" x2="996" y2="1300"/><text x="1000" y="1304" fill="#333">battery</text>
+    <line class="v5"  x1="1060" y1="1300" x2="1080" y2="1300"/><text x="1084" y="1304" fill="#333">+5V</text>
+    <line class="sig" x1="1120" y1="1300" x2="1140" y2="1300"/><text x="1144" y="1304" fill="#333">signal</text>
+    <line class="mot" x1="1190" y1="1300" x2="1210" y2="1300"/><text x="1214" y="1304" fill="#333">motor</text>
+    <line class="gw"  x1="1260" y1="1300" x2="1280" y2="1300"/><text x="1284" y="1304" fill="#333">ground</text>
+    <line class="v33" x1="1330" y1="1300" x2="1350" y2="1300"/><text x="1354" y="1304" fill="#333">Pi 3.3 V</text>
+  </g>
+
+  <text x="1520" y="1345" class="sub" text-anchor="end">TIDI · Hardware/wiring.svg · 2026-10-19</text>
+</svg>
