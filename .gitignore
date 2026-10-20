@@ -32,6 +32,7 @@ secrets.h
 *.csv
 *.obj
 
-# Working notes stay local: only the README is public
+# Working notes stay local: only the README and the BOM are public
 *.md
 !README.md
+!Hardware/BOM.md

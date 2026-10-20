@@ -12,6 +12,7 @@ Photos and the story: [dhairyapandya.com/projects/tidi](https://dhairyapandya.co
 | `Firmware/tidi_esp32/` | Everything on the ESP32: drive and steering through a Cytron MDD3A, the two head servos, the TF-Luna LiDAR, buzzer and LED, Bluetooth LE, the UART link to the Pi, a 500 ms failsafe, a wall stop and the room scan |
 | `Host/scan_room.py` | Runs a room scan over USB and builds a mesh (`room.obj`), or rebuilds one from a saved CSV |
 | `Hardware/wiring.svg` | The schematic |
+| `Hardware/BOM.md` | Parts, and the power budget with datasheet links |
 | `Hardware/esp32.jpg` | The ESP32 dev board used, with its pin labels |
 
 ## Run it
