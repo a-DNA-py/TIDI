@@ -32,7 +32,7 @@
   <rect width="1560" height="1360" fill="#ffffff"/>
 
   <text x="40" y="48" font-size="22" font-weight="bold" fill="#111">TIDI — car electronics, ESP32</text>
-  <text x="40" y="70" class="sub" font-size="13">Drawn as a plan 2026-09-28; the Pi link added 2026-10-19 as Dhairya wired it; the GPS (U8) wired 2026-10-19, not yet read; U4 is now an MG90S. Elsewhere, whether the car matches is unmeasured.</text>
+  <text x="40" y="70" class="sub" font-size="13">The ESP32 runs the car; the Raspberry Pi 5 is its brain, on its own power. Parts list: Hardware/BOM.md.</text>
 
   <!-- ================= BATTERY ================= -->
   <line class="bat" x1="120" y1="120" x2="120" y2="175"/>
@@ -115,7 +115,6 @@
   <text x="790" y="640" class="ref" font-size="16" text-anchor="middle">U1</text>
   <text x="790" y="660" class="lbl" text-anchor="middle">ESP32 dev board</text>
   <text x="790" y="676" class="sub" text-anchor="middle">ESP32-WROOM-32 DevKit</text>
-  <text x="790" y="690" class="sub" text-anchor="middle">(assumed)</text>
   <g class="pin">
     <line x1="640" y1="330" x2="680" y2="330"/>
     <line x1="640" y1="460" x2="680" y2="460"/>
@@ -149,7 +148,7 @@
   <!-- ================= Raspberry Pi 5 U7 ================= -->
   <rect class="box" x="300" y="950" width="280" height="180"/>
   <text x="440" y="972" class="ref" text-anchor="middle">U7  Raspberry Pi 5</text>
-  <text x="440" y="988" class="sub" text-anchor="middle">brain · GOFI Node/tidi.py · logic 3.3 V</text>
+  <text x="440" y="988" class="sub" text-anchor="middle">brain · runs GOFI · logic 3.3 V</text>
   <text x="440" y="1004" class="sub" text-anchor="middle">UART0 → ESP32 at 115200 · UART2 ← GPS</text>
   <text x="440" y="1020" class="sub" text-anchor="middle">own UPS HAT (E), no car rail</text>
   <g class="pin">
@@ -342,16 +341,15 @@
   <text x="976" y="1036" class="lbl">• V_34 = V_BAT × 2.35 / 12.35 → 12.6 V reads 2.40 V (V_BAT = V_34 × 5.26).</text>
   <text x="988" y="1056" class="lbl">GPIO34 is ADC1, so it still reads with WiFi on. Divider is after SW1.</text>
   <text x="976" y="1076" class="lbl">• All ESP32 inputs here are 3.3 V only. Nothing at 5 V may reach a GPIO.</text>
-  <text x="976" y="1096" class="lbl">• GPIO32 → M1A, GPIO33 → M1B: the order the firmware should assume.</text>
+  <text x="976" y="1096" class="lbl">• GPIO32 → M1A, GPIO33 → M1B: the order the firmware assumes.</text>
   <text x="976" y="1116" class="lbl">• GPIO4 is UART2 TX in firmware: leave it unconnected. No strap pins used.</text>
   <text x="976" y="1136" class="lbl">• If the board has no diode between USB and 5V, turn SW1 off before USB goes in.</text>
   <text x="976" y="1156" class="lbl">• No fuse in the LiPo lead yet.</text>
   <text x="976" y="1176" class="lbl">• D1 has no resistor: only GPIO23's driver limits its current. Firmware sets</text>
   <text x="988" y="1196" class="lbl">the pin to its weakest drive. A series resistor is still the safe fix.</text>
-  <text x="976" y="1216" class="lbl">• BZ1 is driven straight from GPIO22, as it was on the Arduino. At 3.3 V</text>
-  <text x="988" y="1236" class="lbl">instead of 5 V it will be quieter.</text>
-  <text x="976" y="1256" class="lbl">• U8 is on the Pi's UART2 (dtoverlay=uart2-pi5). Its VCC is the Pi's 3.3 V,</text>
-  <text x="988" y="1276" class="lbl">safe whether or not the GPS board carries its own regulator.</text>
+  <text x="976" y="1216" class="lbl">• BZ1 is driven straight from GPIO22, at 3.3 V.</text>
+  <text x="976" y="1236" class="lbl">• U8 is on the Pi's UART2 (dtoverlay=uart2-pi5). Its VCC is the Pi's 3.3 V,</text>
+  <text x="988" y="1256" class="lbl">safe whether or not the GPS board carries its own regulator.</text>
   <g font-size="11">
     <line class="bat" x1="976" y1="1300" x2="996" y2="1300"/><text x="1000" y="1304" fill="#333">battery</text>
     <line class="v5"  x1="1060" y1="1300" x2="1080" y2="1300"/><text x="1084" y="1304" fill="#333">+5V</text>
@@ -361,5 +359,5 @@
     <line class="v33" x1="1330" y1="1300" x2="1350" y2="1300"/><text x="1354" y="1304" fill="#333">Pi 3.3 V</text>
   </g>
 
-  <text x="1520" y="1345" class="sub" text-anchor="end">TIDI · Hardware/wiring.svg · 2026-10-19</text>
+  <text x="1520" y="1345" class="sub" text-anchor="end">TIDI · Hardware/wiring.svg · 2026-10-20</text>
 </svg>

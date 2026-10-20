@@ -9,21 +9,21 @@
 // centre) like its tilt. A lost link holds the last angle. Telem's headAz is the angle written.
 //
 // USB serial (115200) prints one status line every 500 ms.
-// Tilt calibration: [ / ] step the tilt MG90S write() value by 1 and print it (the page's tilt is then
-// ignored); r hands tilt back to the page. Use it to re-measure TILT_LEVEL_WRITE and TILT_45_WRITE.
+// Tilt calibration: [ / ] step the tilt MG90S write() value by 1 and print it (the Cmd's tilt is then
+// ignored); r hands tilt back to the Cmd. Use it to re-measure TILT_LEVEL_WRITE and TILT_45_WRITE.
 //
 // Room scan (a state machine, so BLE and the failsafe keep running):
 // AZ_MIN -> AZ_MAX in SCAN_AZ_STEP steps, tilt 90 -> 0 and back at each azimuth, then back to the
-// azimuth it started at. Drive, steering, azimuth and tilt from the page are ignored until it's back.
+// azimuth it started at. Drive, steering, azimuth and tilt from the Cmd are ignored until it's back.
 // Stop (or a lost link) steps it back; a second stop ends the scan and the head goes straight back.
-// Started from the page, or over USB with s (q stops). USB prints START, az,tilt,dist_cm,strength per
+// Started by ScanCtl, or over USB with s (q stops). USB prints START, az,tilt,dist_cm,strength per
 // point, then END: Host/scan_room.py reads it, and its "small" column is this tilt angle (90 = level).
 //
-// Speak: the page turns text into Notes (a tone or glide, and an LED brightness) and writes them to
+// Speak: the controller turns text into Notes (a tone or glide, and an LED brightness) and writes them to
 // SPEAK a few at a time; loop() plays them from a queue. While notes play they own the buzzer and LED.
 // A dropped link empties the queue, like the buzzer.
 //
-// The Pi (TIDI's brain, GOFI's Node/tidi.py) talks over UART1 on GPIO16/17 with the same Cmd, ScanCtl
+// The Pi (TIDI's brain) talks over UART1 on GPIO16/17 with the same Cmd, ScanCtl
 // and Speak payloads, framed (see the Pi link below), and gets Telem and every ScanPoint back. While its
 // Cmd is fresh it drives and BLE's Cmd is ignored; either link counts for the failsafe.
 //
@@ -37,7 +37,7 @@
 #include <BLE2902.h>
 #include <driver/gpio.h>
 
-// ---------------- Pins (PROJECT.md -> Wiring - ESP32) ----------------
+// ---------------- Pins (Hardware/wiring.svg) ----------------
 const int DRIVE_A = 25, DRIVE_B = 26;  // MDD3A M2A/M2B: drive motor
 const int STEER_A = 32, STEER_B = 33;  // MDD3A M1A/M1B: steering motor
 const int AZ_PIN = 18;                 // MG90S (180 deg): azimuth
@@ -55,8 +55,8 @@ const int PI_TX = 17;                  // UART1 TX -> Pi 5 GPIO15 (RXD0, header 
 // seen from above; if the cloud comes out mirrored, set FLIP_AZ there.
 const int AZ_MIN = -90, AZ_MAX = 90;   // deg: write() 0..180
 
-// Tilt angle (the page's slider): 90 = line of sight level with the ground, 0 = straight up.
-// Measured 2026-09-28 by eye: write 81 is level, write 40 is 45 deg up. Straight line through the two,
+// Tilt angle: 90 = line of sight level with the ground, 0 = straight up.
+// Measured by eye: write 81 is level, write 40 is 45 deg up. Straight line through the two,
 // so vertical is write -1: write 0 (the servo's end) stops about 1 deg short. Telem reports the
 // angle actually reached.
 const int TILT_LEVEL_WRITE = 81;       // write() value with the line of sight level
@@ -84,7 +84,7 @@ const int BUZZ_MIN_HZ = 100, BUZZ_MAX_HZ = 5000;
                                        // The LED uses the motors' MOTOR_PWM_HZ at 8 bits, so it shares their timer
 const int SPEECH_MAX = 256;            // queued Notes; a longer text is cut off
 
-// Wall stop, with the head facing forward. Set by estimate: the car's stopping distance at 7 V is unmeasured.
+// Wall stop, with the head facing forward. Estimates: the car's stopping distance hasn't been measured.
 const int WALL_STOP_CM = 35;           // no forward drive under this
 const int WALL_SLOW_CM = 90;           // forward power ramps from WALL_MIN_PCT at WALL_STOP_CM to 100 % here
 const int WALL_MIN_PCT = 30;
@@ -109,7 +109,7 @@ const unsigned long AZ_TRAVEL_MS = 40; // per 5 deg step on the way to a column,
 #define POINT_UUID   "1160bfdb-3023-4df7-9156-6c73ae8af510"   // notify: one ScanPoint per point
 #define SPEAK_UUID   "7e2d4b19-3c8a-4f61-b0d5-9a1e6c2f8b43"   // write: uint8 flags (bit0 = drop queued notes first) + 0..3 Notes
 
-struct __attribute__((packed)) Cmd {   // page -> car
+struct __attribute__((packed)) Cmd {   // controller -> car
   int8_t drive;    // -100..100 %
   int8_t steer;    // -100 (left)..100 (right) %
   int8_t az;       // -90..90 deg, 0 = the servo's centre
@@ -118,20 +118,20 @@ struct __attribute__((packed)) Cmd {   // page -> car
   uint16_t buzzHz; // buzzer frequency
 };
 
-struct __attribute__((packed)) Telem { // car -> page
+struct __attribute__((packed)) Telem { // car -> controller
   int16_t dist;    // cm, raw; bits 3-5 say why it isn't trusted. -1 = no frame yet
   uint16_t strength;
   uint16_t battMv;
   int8_t tilt;     // deg, as applied
   uint8_t flags;   // bit0 low-battery cutoff, bit1 steering timed out, bit2 LiDAR stale,
                    // bit3 weak signal (< 100), bit4 saturated (65535), bit5 under 20 cm, bit6 tilt limited
-  uint8_t scan;    // 0 idle, 1 scanning, 2 returning (3 was the MG995's c / b turn, now gone)
+  uint8_t scan;    // 0 idle, 1 scanning, 2 returning
   int16_t headAz;  // deg, as the Cmd's az, as written
   uint8_t ahead;   // bit0 head marked as facing forward, bit1 watching ahead (marked, level, idle),
                    // bit2 wall: forward cut, bit3 forward slowed, bit4 the Pi is driving, bit5 BLE connected
 };
 
-struct __attribute__((packed)) ScanPoint {  // car -> page, one per point
+struct __attribute__((packed)) ScanPoint {  // car -> controller, one per point
   uint16_t seq;    // 0 = first point of a scan
   int16_t az;      // deg, as headAz
   int8_t tilt;     // deg, 90 = level
@@ -208,7 +208,6 @@ class SpeakCallbacks : public BLECharacteristicCallbacks {
 // Frame: 0xA5, type, len, payload[len], CRC-8 (poly 0x07, init 0) over type, len and payload.
 // Pi -> car: 'C' Cmd (7 bytes), 'S' ScanCtl (1), 'K' Speak (1 + 6 per Note, at most 42 Notes).
 // Car -> Pi: 'T' Telem (12) every 100 ms, 'P' ScanPoint (9) per point.
-// Must match GOFI's Node/tidi.py (frame, Frames).
 const uint8_t PI_SYNC = 0xA5;
 uint8_t piBuf[255];
 int piState = 0, piLen = 0, piGot = 0;
@@ -282,7 +281,7 @@ void pollLidar() {
       if (sum == lbuf[8]) {
         int d = lbuf[2] | (lbuf[3] << 8);
         uint16_t s = lbuf[4] | (lbuf[5] << 8);
-        // Raw distance goes out with the reason it fails the scan's validity rule, so the page
+        // Raw distance goes out with the reason it fails the scan's validity rule, so a controller
         // can show why instead of a blank
         tel.strength = s;
         tel.dist = d;
@@ -296,9 +295,9 @@ void pollLidar() {
 }
 
 // Battery: smoothed, with a latched cutoff
-// Sampled every BATT_SAMPLE_MS, not every pass of loop(): smoothing per pass (thousands a second) smoothed nothing,
-// so a motor starting dipped the reading under CUTOFF_V and the motors were cut mid-drive, five times in 17 s
-// (2026-09-28, at 11.1 V resting). The cutoff now needs the smoothed voltage low for CUTOFF_HOLD_MS.
+// Sampled every BATT_SAMPLE_MS, not every pass of loop(): smoothing per pass (thousands a second) smooths nothing,
+// and a motor starting would dip the reading under CUTOFF_V and cut the motors mid-drive. The cutoff also needs the
+// smoothed voltage low for CUTOFF_HOLD_MS.
 const unsigned long BATT_SAMPLE_MS = 20;
 const float BATT_SMOOTH = 0.05;        // per sample: about 0.4 s to settle
 const unsigned long CUTOFF_HOLD_MS = 2000;
@@ -327,7 +326,7 @@ int dutyCap() {
 
 // MDD3A channel: forward is A=PWM, B=LOW; reverse is B=HIGH with A=PWM
 // of the inverted duty, so the output alternates reverse/brake. Assumes each MDD3A output
-// follows its input; unconfirmed.
+// follows its input.
 void setMotor(int pinA, int pinB, int pct, bool invert) {
   if (invert) pct = -pct;
   int d = (long)abs(pct) * dutyCap() / 100;
@@ -359,7 +358,7 @@ int steerOutput(int want) {
 int azToWrite(int deg) { return constrain(deg, AZ_MIN, AZ_MAX) + 90; }
 
 int azWritten = -1;
-int azCmd = 0;                         // deg the page or the Pi last asked for; held when the link drops
+int azCmd = 0;                         // deg BLE or the Pi last asked for; held when the link drops
 
 void writeAz(int w) {
   if (w != azWritten) { servoWrite(AZ_PIN, w); azWritten = w; }
@@ -376,7 +375,7 @@ int writeToTilt(int w) {
 }
 
 bool tiltLimited = false;
-int tiltManual = -1;                   // write() value set over USB serial, -1 = page controls tilt
+int tiltManual = -1;                   // write() value set over USB serial, -1 = the Cmd controls tilt
 uint16_t buzzNow = 0;                  // Hz currently playing, 0 = silent
 int tiltWritten = -1;
 bool aheadKnown = false;               // the head was marked as facing forward and hasn't turned by hand since
@@ -530,7 +529,7 @@ void applyCmd() {
   bool bleOk = lastCmdMs && millis() - lastCmdMs < LINK_TIMEOUT_MS;
   portEXIT_CRITICAL(&cmdMux);
   piDriving = lastPiCmdMs && millis() - lastPiCmdMs < LINK_TIMEOUT_MS;
-  if (piDriving) c = piCmd;                        // the Pi relays the Mac's controls too, so it wins
+  if (piDriving) c = piCmd;                        // the Pi relays its app's controls too, so it wins
   bool linkOk = piDriving || bleOk;
   static bool piWas = false;
   if (piWas && !piDriving) linkLostReq = true;     // the Pi went quiet: a running scan goes home
@@ -576,7 +575,7 @@ void handleSerial() {
     Serial.print("tilt write="); Serial.println(tiltManual);
   } else if (ch == 'r') {
     tiltManual = -1;
-    Serial.println("tilt back to the page");
+    Serial.println("tilt back to the Cmd");
   } else if (ch == 's') {
     scanStartReq = true;
   } else if (ch == 'q') {

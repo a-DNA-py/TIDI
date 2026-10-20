@@ -21,18 +21,15 @@ env/
 # Arduino build output (arduino-cli --export-binaries)
 Firmware/**/build/
 
-# Rebuilt from a scan CSV by `scan_room.py --file`
-room.obj
-
-# Secrets, in case WiFi or a key ever comes back
+# Secrets
 secrets.h
 *.env
 
-# Room scans are 3D maps of the house. Commit one on purpose with `git add -f`.
+# Room scans and the meshes built from them (scan_room.py rebuilds room.obj from a CSV)
 *.csv
 *.obj
 
-# Working notes stay local: only the README and the BOM are public
+# Local notes; the README and the BOM are the published docs
 *.md
 !README.md
 !Hardware/BOM.md
